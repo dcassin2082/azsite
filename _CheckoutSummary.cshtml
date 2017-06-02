@@ -1,0 +1,67 @@
+﻿<script src="~/Scripts/aaz-checkout.js"></script>
+<script type="text/javascript">
+    var shippingData = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.Shipping));
+</script>
+<script>
+    function vm() {
+        this.shipping = ko.observableArray(shippingData);
+    }
+    ko.applyBindings(new vm());
+</script>
+<div id="div-cart">
+    <div id="div-rightbar">
+        <div id="div-rightbar-container">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 div-part-buy">
+                @*<div class="row">
+                        <div class="div-part-buy-container price">
+                            <strong>
+                                Subtotal<span data-bind="text: ' (' + numberOfItems() + ' items): '"></span><span id="total" data-bind="text: '$' + total().toFixed(2)"></span>
+                            </strong>
+                        </div>
+                    </div>*@
+                <br />
+                <hr />
+                @using (Html.BeginForm("SubmitOrder", "Checkout", FormMethod.Post))
+                {
+                    <div class="form-group">
+                        <strong>Order summary</strong>
+                    </div>
+                    <div class="form-group">
+                        <div class="div-part-buy-container price"><h5 class="text-muted">Choose shipping method:</h5></div>
+                        <select required id="shipping_method" class="form-control" data-bind="options: shippingData, optionsCaption: '-- Select --', optionsText:function(item){return ko.unwrap(item.shippingCost) + ' ' + ko.unwrap(item.shippingMethod_Alias)}, optionsValue:function(item){return ko.unwrap(item.shippingCost)}"></select>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <div class="div-part-buy-container price">
+                            <span class="text-muted">Items:</span>
+                            @*<span id="spanTotalBeforeTax" class="pull-right" data-bind="text: '$' + total().toFixed(2)"></span>*@
+                            <span id="spanTotalBeforeTax" class="pull-right"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <span class="text-muted">Estimated shipping and handling:</span>
+                        <span id="shipping-amt" class="pull-right"><strong></strong></span>
+                    </div>
+                    @*only visible if tax > $0.00*@
+                    <div class="form-group">
+                        <span id="spanTaxLabel" class="text-muted">Estimated tax (AZ residents only): </span>
+                        <span id="spanEstimatedTax" class="pull-right"></span>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <strong>Estimated order total:</strong>
+                        <span id="estimated-total" class="pull-right"></span>
+                    </div>
+                    <hr />
+                    <div id="div-submitform">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-primary btn-block" typeof="submit" value="Submit Order" />
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+    </div>
+</div>

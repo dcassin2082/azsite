@@ -1,0 +1,457 @@
+﻿@*<script src="~/Scripts/aaz-cart.js"></script>*@
+<script src="~/Scripts/aaz-checkout1.js"></script>
+<script src="~/Scripts/aaz-catalog.js"></script>
+<script type="text/javascript">
+    var checkoutData = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.Checkout));
+    var addresses = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.Addresses));
+    var creditcards = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.CreditCards));
+    var cartData = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.Cart));
+    var paypal = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.PaypalPayment));
+    // var shippingData = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.Shipping));
+    var preferredAddress = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.PreferredAddress));
+    var nonPreferredAddresses = @Html.Raw(new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(ViewBag.NonPreferredAddresses));
+</script>
+
+@model AAZWeb.Models.CheckoutViewModel
+<br />
+<div class="navbar navbar-default">
+    <h1 style="text-align:center">Checkout</h1>
+</div>
+<div class="panel-group" id="accordion">
+    <div class="panel panel-primary" id="pnlShippingAddress">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" id="lnkShippingAddress" data-parent="#accordion" href="#collapseShipping" style="text-decoration:none">
+                    Shipping Address
+                </a>
+            </h4>
+        </div>
+        <br />
+        @*if it is a paypal transaction, display the pay pal shipping info in the summary*************************************************************************************************@
+        <div id="shippingSummary">
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <div class="col-md-offset-1 col-md-6">
+                        <div id="selectedFullname"></div>
+                        <div id="selectedAddress"></div>
+                        <div id="selectedCityStateZip"></div>
+                    </div>
+                    <div class="col-md-offset-2 col-md-2 pull-right">
+                        <a data-toggle="collapse" style="display:none" id="lnkChangeShippingAddress" data-parent="#accordion" href="#collapseShipping" class="btn btn-primary">Change</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="collapseShipping" class="panel-collapse collapse in">
+            <div style="display:none" id="shippingAddressSummary class=panel-collapse collapse" data-bind="visible: addresses().length > 0">
+                <form class="form-horizontal" role="form">
+                    <div id="div-shipping-label" class="form-group">
+                        <div class="col-md-offset-1 col-md-8">
+                            <h4 class="text-muted">Choose a shipping address</h4>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-8" id="divShippingAddresses" data-bind="foreach: addresses">
+                            <label class="lblShippingAddress" data-bind="attr: { id:'lblShippingAddress' + $index()}" id="$index">
+                                <input type="radio" name="rdoShippingAddress" class="rdoShippingAddress" data-bind="value: AddressID, attr:{id: 'rdoShippingAddress' + $index()} " id="$index" />
+                                <span data-bind="text: FirstName + ' ' + LastName + ', ' + Address1 + ' ' + Address2 + ', ' + City + ' ' + State + ' ' + Zip"></span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <section id="addShippingAddressForm">
+                <form class="form-horizontal" role="form" id="frmAddShippingAddress">
+                    <div id="addNewAddress" class="@(Model.Addresses.Count() > 0 ? "panel-collapse collapse" : "panel-collapse in")">
+                        <div class="form-group">
+                            <div class="col-md-offset-1 col-md-8">
+                                <h4 class="text-muted">Add a new shipping address</h4>
+                                <br />
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.FullName, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.FullName, new { @class = "form-control txtShippingInput", @placeholder = "Enter your full name", @id = "txtShippingFullName", data_bind = "value: shippingfullname" })
+                                        @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Address1, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.Address1, new { @class = "form-control txtShippingInput", @placeholder = "Address line 1", @id = "txtShippingAddress1", data_bind = "value: shippingaddress1" })
+                                        @Html.ValidationMessageFor(m => m.Address1, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Address2, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.Address2, new { @class = "form-control txtShippingInput", @placeholder = "Address line 2", @id = "txtShippingAddress2", data_bind = "value: shippingaddress2" })
+                                        @Html.ValidationMessageFor(m => m.Address2, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.City, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.City, new { @class = "form-control txtShippingInput", @placeholder = "City", @id = "txtShippingCity", data_bind = "value: shippingcity" })
+                                        @Html.ValidationMessageFor(m => m.City, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.State, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-4">
+                                        @Html.DropDownListFor(m => m.State, AAZWeb.Helpers.CheckoutModelHelper.GetStates(), "-- Select --", new { @class = "form-control", @id = "ddlShippingStates", data_bind = "value: shippingstate" })
+                                        @Html.ValidationMessageFor(m => m.State, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Zip, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(m => m.Zip, new { @class = "form-control txtShippingInput", @placeholder = "ZIP / Postal Code", @id = "txtShippingZip", data_bind = "value: shippingzip" })
+                                        @Html.ValidationMessageFor(m => m.Zip, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Country, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-4">
+                                        @Html.DropDownListFor(m => m.Country, AAZWeb.Helpers.CheckoutModelHelper.GetCountries(), "-- Select --", new { @class = "form-control", @id = "ddlShippingCountries", data_bind = "value: shippingcountry" })
+                                        @Html.ValidationMessageFor(m => m.Country, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Phone, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control txtShippingInput", @placeholder = "Phone", @id = "txtShippingPhone", data_bind = "value: shippingphone" })
+                                        @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-3 col-sm-9">
+                                        <a data-toggle="collapse" id="btnAddShippingAddress" data-parent="#shippingAddressSummary" data-bind="click: addShippingAddress" class="btn btn-primary">Add Address</a>
+                                    </div>
+                                </div>
+                                <div class="col-md-offset-2 col-md-2 pull-right">
+                                    <a data-toggle="collapse" style="display:none" id="lnkChangeShippingAddress" data-parent="#shippingSummary" href="#collapseShipping" class="btn btn-primary">Change</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divAddNewShippingAddress" style="@(Model.Addresses.Count() > 0 ? "display:block" : "display:none")">
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-8">
+                                <a data-toggle="collapse" data-parent="#shippingSummary" href="#addNewAddress"><i id="lnkAddNewShippingAddress" class="glyphicon-plus text-muted"> Add a new address</i></a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-6">
+                                <a data-toggle="collapse" id="lnkUseThisAddress" class="btn btn-primary btn-sm" data-parent="#accordion" href="#collapsePayment">Use This address</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+    <br />
+    <div class="panel panel-primary" id="pnlPayment">
+        <div class="my-panel-heading" id="pnlPaymentHeading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" id="lnkPaymentMethods" data-parent="#accordion" style="text-decoration:none;cursor:default;">
+                    Payment Method
+                </a>
+            </h4>
+        </div>
+        <br />
+        @*if it is a paypal transaction, display the pay pal payment info in the summary*************************************************************************************************@
+        <div id="paymentSummary">
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <div class="col-md-offset-1 col-md-6">
+                        <div id="divSelectedPaymentMethod"></div>
+                        <div id="divSelectedBillingAddress">
+                        </div>
+                    </div>
+                    <div class="col-md-offset-2 col-md-2 pull-right">
+                        <a data-toggle="collapse" style="display:none" id="lnkChangePaymentMethod" data-parent="#paymentSummary" href="#collapsePayment" class="btn btn-primary">Change</a>
+                    </div>
+
+                </div>
+                @*<div>
+                        <a data-toggle="collapse" id="lnkChangeBillingAddress" href="#collapsePayment" data-parent="#paymentSummary" style="display:none;text-decoration:none;">Change</a>
+                    </div>*@
+            </form>
+        </div>
+        <div id="collapsePayment" class="panel-collapse collapse">
+            <div id="existingCards" class="panel-collapse" data-bind="visible: creditcards().length > 0">
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <div class="col-md-offset-1 col-md-8" id="div-cards-label">
+                            <div class="col-md-6">
+                                <h4 class="text-muted">Your credit and debit cards</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-6" id="div-cards" data-bind="foreach: creditcards">
+                            <label class="lblPaymentMethod" data-bind="attr: { id:'lblPaymentMethod' + $index()}" id="$index">
+                                <input type="radio" class="rdoPaymentMethods" name="rdoPaymentMethods" data-bind="value: CCID, attr:{id: 'rdoPaymentMethods' + $index()}" id="$index" />
+                                <span data-bind="text: CCName + ', ' + CardType + ' Ending in ' + CCNum + ', Expiration: ' + ExpMonth + '/' + ExpYear"></span>
+                                <br />
+                                @*<span style="display:none" data-bind="attr: { id: 'spanSelected' + $index()}" id="$index" class="col-md-offset-1 ">
+                                        Enter cvv #:
+                                        <input style="width:50px; border-radius:10%; text-align:center;" data-bind="attr: { id: 'txtCvv' + $index()}" id="$index" class="txtCvv" placeholder="xxx" />
+                                    </span>*@
+                            </label>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <section id="addPaymentForm">
+                <form class="form-horizontal" role="form" id="frmAddPaymentMethod">
+                    <div id="addNewPaymentMethod" class="panel-collapse" style="@(Model.CreditCards.Count() > 0 ? "display:none" : "display:block")">
+                        <div class="form-group">
+                            <div class="col-md-offset-1 col-md-5" style="display:inline">
+                                <h4 class="text-muted">Add a debit or credit card</h4>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-3 col-md-6">
+                                <ul class="list-inline">
+                                    <li class="borderlist">
+                                        <img src="../Content/images/cc_images/cc_visa.png" />
+                                    </li>
+                                    <li class="borderlist">
+                                        <img src="../Content/images/cc_images/cc_master_card.png" />
+                                    </li>
+                                    <li class="borderlist">
+                                        <img src="~/Content/images/cc_images/cc_discover.png" />
+                                    </li>
+                                    <li>
+                                        <img src="~/Content/images/cc_images/cc_american_express.png" />
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.CardType, new { @class = "col-sm-3 control-label" })
+                            <div class="col-md-4">
+                                @Html.DropDownListFor(m => m.CardType, AAZWeb.Helpers.CheckoutModelHelper.GetPaymentMethods(), "-- Select --", new { @class = "form-control", @id = "ddlPaymentMethods", data_bind = "value: cardType" })
+                                @Html.ValidationMessageFor(m => m.CardType, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.CardNumber, new { @class = "col-sm-3 control-label" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(m => m.CardNumber, new { @class = "form-control txtPaymentMethodInput", @placeholder = "Debit/Credit Card Number", @id = "card-number", data_bind = "value: cardnumber" })
+                                @Html.ValidationMessageFor(m => m.CardNumber, "", new { @class = "text-danger" })
+                            </div>
+                            <div id="divInvalidCardNumber" class="col-md-offset-1 col-md-6">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.NameOnCard, new { @class = "col-sm-3 control-label" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(m => m.NameOnCard, new { @class = "form-control txtPaymentMethodInput", @placeholder = "Card Holder's Name", @id = "card-holder-name", data_bind = "value: nameoncard" })
+                                @Html.ValidationMessageFor(m => m.NameOnCard, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.ExpMonth, new { @class = "col-sm-3 control-label" })
+                            <div class="col-md-2">
+                                @Html.DropDownListFor(m => m.ExpMonth, AAZWeb.Helpers.CheckoutModelHelper.GetExpMonths(), "-- Select --", new { @class = "form-control", @id = "ddlExpMonths", data_bind = "value: expmonth" })
+                                @Html.ValidationMessageFor(m => m.ExpMonth, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.ExpYear, new { @class = "col-sm-3 control-label" })
+                            <div class="col-md-2">
+                                @Html.DropDownListFor(m => m.ExpYear, AAZWeb.Helpers.CheckoutModelHelper.GetExpYears(), "-- Select --", new { @class = "form-control", @id = "ddlExpYears", data_bind = "value: expyear" })
+                                @Html.ValidationMessageFor(m => m.ExpYear, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-6">
+                                @Html.CheckBoxFor(m => m.DefaultPaymentMethod, new { @id = "chkDefaultPayment", data_bind = "checked: defaultpaymentmethod" })
+                                @Html.LabelFor(m => m.DefaultPaymentMethod)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-9">
+                                <a data-toggle="collapse" id="lnkAddCard" class="btn btn-primary" data-bind="click: addPaymentMethod" data-parent="#existingCards">Add Card</a>
+                            </div>
+                        </div>
+                        <br />
+
+                    </div>
+                    <div style="@(Model.CreditCards.Count() > 0 ? "display:block" : "display:none")" id="divAddNewPaymentMethod">
+
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-6">
+                                <a data-toggle="collapse" id="lnkUseThisPaymentMethod" class="btn btn-primary btn-sm" data-parent="#accordion" href="#collapseReview">Use This payment method</a>
+                                @*<button type="button" data-bind="click: useThisPaymentMethod" data-toggle="collapse" id="lnkUseThisPaymentMethod" class="btn btn-primary btn-sm" data-parent="#accordion" data-target="#collapseReview">Use This payment method</button>*@
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-6">
+                                <a style="cursor:pointer" @*data-toggle="collapse"*@ @*data-toggle="collapse" data-parent="#paymentSummary"*@ @*href="#addNewPaymentMethod"*@><i id="lnkAddNewPaymentMethod" class="glyphicon-plus text-muted"> Add a new payment method</i></a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <section id="sectionAddBillingAddressForm">
+                <form class="form-horizontal" role="form" id="frmAddBillingAddress">
+                    <div id="selectBillingAddress" class="panel-collapse collapse">
+                        <div class="form-group">
+                            <div class="col-md-offset-1 col-md-6">
+                                <div class="col-md-6">
+                                    <h4 class="text-muted">Choose a billing address</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-8" id="divBillingAddresses" data-bind="foreach: addresses">
+                                <label class="lblBillingAddress" data-bind="attr: { id:'lblBillingAddress' + $index()}" id="$index">
+                                    <input type="radio" name="rdoBillingAddress" class="rdoBillingAddress" data-bind="value: AddressID, attr:{id: 'rdoBillingAddress' + $index()}" id="$index" />
+                                    <span data-bind="text: FirstName + ' ' + LastName + ', ' + Address1 + ' ' + Address2 + ', ' + City + ' ' + State + ' ' + Zip"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="addBillingAddress" class="panel-collapse collapse">
+                        <div class="form-group">
+                            <div class="col-md-offset-1 col-md-8">
+                                <h4 class="text-muted">Add a new billing address</h4>
+                                <br />
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.BillingFullName, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.BillingFullName, new { @class = "form-control txtBillingInput", @placeholder = "Enter your full name", @id = "txtBillingFullName", data_bind = "value:billingfullname" })
+                                        @Html.ValidationMessageFor(m => m.BillingFullName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.BillingAddress1, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.BillingAddress1, new { @class = "form-control txtBillingInput", @placeholder = "Address line 1", @id = "txtBillingAddress1", data_bind = "value:billingaddress1" })
+                                        @Html.ValidationMessageFor(m => m.BillingAddress1, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.BillingAddress2, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.BillingAddress2, new { @class = "form-control txtBillingInput", @placeholder = "Address line 2", @id = "txtBillingAddress2", data_bind = "value:billingaddress2" })
+                                        @Html.ValidationMessageFor(m => m.BillingAddress2, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.BillingCity, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-6">
+                                        @Html.TextBoxFor(m => m.BillingCity, new { @class = "form-control txtBillingInput", @placeholder = "City", @id = "txtBillingCity", data_bind = "value:billingcity" })
+                                        @Html.ValidationMessageFor(m => m.BillingCity, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.BillingState, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-4">
+                                        @Html.DropDownListFor(m => m.BillingState, AAZWeb.Helpers.CheckoutModelHelper.GetStates(), "-- Select --", new { @class = "form-control", @id = "ddlBillingStates", data_bind = "value:billingstate" })
+                                        @Html.ValidationMessageFor(m => m.BillingState, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.BillingZip, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(m => m.BillingZip, new { @class = "form-control txtBillingInput", @placeholder = "ZIP / Postal Code", @id = "txtBillingZip", data_bind = "value:billingzip" })
+                                        @Html.ValidationMessageFor(m => m.BillingZip, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.BillingCountry, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-4">
+                                        @Html.DropDownListFor(m => m.BillingCountry, AAZWeb.Helpers.CheckoutModelHelper.GetCountries(), "-- Select --", new { @class = "form-control", @id = "ddlBillingCountries", data_bind = "value:billingcountry" })
+                                        @Html.ValidationMessageFor(m => m.BillingCountry, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.BillingPhone, new { @class = "col-sm-3 control-label" })
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(m => m.BillingPhone, new { @class = "form-control txtBillingInput", @placeholder = "Phone", @id = "txtBillingPhone", data_bind = "value:billingphone" })
+                                        @Html.ValidationMessageFor(m => m.BillingPhone, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-3 col-sm-9">
+                                        <a @*data-toggle="collapse"*@ id="btnAddBillingAddress" @*data-parent="#paymentSummary"*@ data-bind="click:addBillingAddress" class="btn btn-primary">Add Address</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divAddNewBillingAddress" style="display:none">
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-6">
+                                <a id="lnkUseThisBillingAddress" data-bind="click: useThisBillingAddress" class="btn btn-primary btn-sm">Use This address</a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-8">
+                                <a data-toggle="collapse" data-parent="#addBillingAddress" href="#addNewPaymentMethod"><i id="lnkAddNewBillingAddress" class="glyphicon-plus text-muted"> Add a new address</i></a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+
+        </div>
+    </div>
+    <br />
+    <div class="panel panel-primary" id="pnlReviewAndShip">
+        @*if it is a pay pal transaction, the review and ship panel should be opened when we get to this page, it needs to contain the shopping cart items,
+            the (PlaceOrder.cshtml) stuff, as well as the shipping options.   the submit button, it should be calculate the subtotal plus shipping amounts*@
+        <div class="my-panel-heading" id="pnlReviewAndShippingHeading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" id="lnkReviewAndShip" data-parent="#accordion" style="text-decoration:none;cursor:default;">
+                    Review and Ship
+                </a>
+            </h4>
+        </div>
+        <div id="collapseReview" class="panel-collapse collapse">
+            <div class="row" id="div-shopping-cart">
+                <div class="col-md-offset-1 col-md-5"></div>
+                <div class="col-md-offset-1 col-md-4">
+                    @Html.Action("GetCheckoutSummary")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<script>
+        $("#shipping_method").change(function () {
+            var shippingMethod = $(this).val();
+            console.log(shippingMethod);
+            $.ajax({
+                type: 'GET',
+                cache: false,
+                datatype: 'json',
+                contentType: 'application/json',
+                url: '/checkout/SetShippingMethod',
+                data: {
+                    shippingMethod: shippingMethod
+                },
+                traditional: true,
+                success: function (result) {
+                    if (result != '' && result != 'Select') {
+                        $("#div-shipping-amount").show();
+                        $("#shipping-amt").show();
+                        $("#shipping-amt").text('$' + result);
+                    }
+                    else {
+                        $("#div-shipping-amount").hide();
+                        $("#shipping-amt").hide();
+                    }
+                }
+            });
+        });
+</script>*@

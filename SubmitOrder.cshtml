@@ -1,0 +1,147 @@
+﻿@model AAZWeb.Models.PayViewModel
+<div class="container-fluid">
+    <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <div class="well">
+                <h3 class="text-center">@Model.PayerFirstName @Model.PayerLastName, thank you for your order!</h3>
+            </div>
+        </div>
+
+        @*<div class="navbar navbar-default">
+                <h3 class="text-center">@Model.PayerFirstName @Model.PayerLastName, thank you for your Order!</h3>
+            </div>*@
+        <!----- header above ---->
+        @*<div class="form-group">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4 class="text-muted">PayPal Transaction Details</h4>
+                        <hr />
+                        <h5>Payment ID: <span class="text-muted">@Model.PaymentId</span></h5>
+                        <h5>Transaction ID: <span class="text-muted">@Model.TransactionId</span></h5>
+                        <h5>State: <span class="text-muted">@Model.PaymentState</span></h5>
+                        <h5>Total Amount: <span class="text-muted">@Model.FinalAmount @Model.Currency</span></h5>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class="text-muted">Shipping Details</h4>
+                        <hr />
+                        <h5>Recipient: <span class="text-muted">@Model.RecipientName</span></h5>
+                        <h5>Address: <span class="text-muted">@Model.AddressLines</span></h5>
+                        <h5>City/State/ZIP: <span class="text-muted">@Model.City, @Model.State @Model.PostalCode</span></h5>
+                        <h5>Country: <span class="text-muted">@Model.CountryCode</span></h5>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class="text-muted">Order Totals</h4>
+                        <hr />
+                        <h5>Subtotal: <span class="text-muted">$@Model.SubTotal</span></h5>
+                        <h5>Shipping: <span class="text-muted">$@Model.ShippingAmount</span></h5>
+                        <h5>Total: <span class="text-muted">$@Model.GrandTotal</span></h5>
+                    </div>
+                </div>
+            </div>*@
+        <div class="form-group">
+            <h4 class="text-muted">Order Details</h4>
+        </div>
+        @{
+            int rowNumber = 1;
+        }
+        <div class="form-group">
+            <table class="table table-bordered table-striped table-condensed">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Item description</th>
+                        <th>Part Number</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Line Total</th>
+                        @*<th>Total</th>*@
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.CartItems)
+                    {
+                        var lineTotal = item.price * item.qty;
+                        <tr>
+                            <td>@(rowNumber++)</td>
+                            <td>@Html.DisplayFor(m => item.name)</td>
+                            <td>@Html.DisplayFor(m => item.PartNum)</td>
+                            <td>@Html.DisplayFor(m => item.price)</td>
+                            <td>@Html.DisplayFor(m => item.qty)</td>
+                            <td>@Html.DisplayFor(m => lineTotal)</td>
+                        </tr>
+                    }
+                    @*<tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><strong>Subtotal:</strong></td>
+                            <td>@Html.DisplayFor(m => @Model.SubTotal)</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><strong>Shipping:</strong></td>
+                            <td>@Html.DisplayFor(m => @Model.ShippingAmount)</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><strong>Total:</strong></td>
+                            <td>@Html.DisplayFor(m => @Model.GrandTotal)</td>
+                        </tr>*@
+                </tbody>
+            </table>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-md-4">
+                    <h4 class="text-muted">Transaction Details</h4>
+                    <hr />
+                    <h5>Payment ID: <span class="text-muted pull-right">@Model.PaymentId</span></h5>
+                    <h5>Transaction ID: <span class="text-muted pull-right">@Model.TransactionId</span></h5>
+                    <h5>State: <span class="text-muted pull-right">@Model.PaymentState</span></h5>
+                    <h5>Total Amount: <span class="text-muted pull-right">@Model.FinalAmount @Model.Currency</span></h5>
+                </div>
+                <div class="col-md-4">
+                    <h4 class="text-muted">Shipping Details</h4>
+                    <hr />
+                    <h5>Recipient: <span class="text-muted pull-right">@Model.RecipientName</span></h5>
+                    <h5>Address: <span class="text-muted pull-right">@Model.AddressLines</span></h5>
+                    <h5>City/State/ZIP: <span class="text-muted pull-right">@Model.City, @Model.State @Model.PostalCode</span></h5>
+                    <h5>Country: <span class="text-muted pull-right">@Model.CountryCode</span></h5>
+                </div>
+                <div class="col-md-4">
+                    <h4 class="text-muted">Order Totals</h4>
+                    <hr />
+                    <h5>Subtotal: <span class="text-muted pull-right">@Html.Raw(string.Format("{0:C}", @Model.SubTotal))</span></h5>
+                    <h5>Shipping: <span class="text-muted pull-right">@Html.Raw(string.Format("{0:C}", @Model.ShippingAmount))</span></h5>
+                    @if (Model.TaxAmount > 0)
+                        {
+                        <h5>Tax: <span class="text-muted pull-right">@Html.Raw(string.Format("{0:C}", @Model.TaxAmount))</span></h5>
+                    }
+                    <h5>Total: <span class="text-muted pull-right">@Html.Raw(string.Format("{0:C}", @Model.GrandTotal))</span></h5>
+                </div>
+            </div>
+        </div>
+        @*<div class="form-group">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4 class="text-muted">Order Totals</h4>
+                        <hr />
+                        <h5>Subtotal: <span class="text-muted">$@Model.SubTotal</span></h5>
+                        <h5>Shipping: <span class="text-muted">$@Model.ShippingAmount</span></h5>
+                        <h5>Total: <span class="text-muted">$@Model.GrandTotal</span></h5>
+                    </div>
+                </div>
+            </div>*@
+    </form>
+
+
+</div>
+
+
